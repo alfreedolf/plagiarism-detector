@@ -16,7 +16,7 @@ class BinaryClassifier(nn.Module):
     """
 
     ## TODO: Define the init function, the input params are required (for loading code in train.py to work)
-    def __init__(self, input_features, hidden_dim, output_dim, dropout):
+    def __init__(self, input_features, hidden_dim, output_dim, dropout_factor):
         """
         Initialize the model by setting up linear layers.
         Use the input parameters to help define the layers of your model.
@@ -30,7 +30,7 @@ class BinaryClassifier(nn.Module):
         self.fc1 = nn.Linear(input_features, hidden_dim)
         self.fc2 = nn.Linear(hidden_dim, output_dim)
         # a dropout layer to prevent overfitting
-        self.dropout = nn.Dropout(dropout)
+        self.dropout = nn.Dropout(dropout_factor)
 
     
     ## TODO: Define the feedforward behavior of the network
