@@ -5,7 +5,7 @@ This repository contains my implementation of the a plagiarism detector using AW
 
 ## Project Overview
 
-In this project, I've been tasked with building a plagiarism detector that examines a text file and performs binary classification; labeling that file as either *plagiarized* or *not*, depending on how similar that text file is to a provided source text. Detecting plagiarism is an active area of research; the task is non-trivial and the differences between paraphrased answers and original work are often not so obvious.
+In this project, I've built a plagiarism detector that examines a text file and performs binary classification on it labeling that file as either *plagiarized* or *not*, depending on how similar that text file is to a provided source text. Detecting plagiarism is an active area of research; the task is non-trivial and the differences between paraphrased answers and original work are often not so obvious.
 
 This project has been broken down into three main notebooks:
 
