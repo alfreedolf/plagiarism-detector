@@ -28,6 +28,7 @@ class BinaryClassifier(tf.keras.Model):
     def call(self, inputs, training=False):
         """
         Perform a forward pass of our model on input features, x.
+        :param training: weather the training is active or not.
         :param inputs: A batch of input features of size (batch_size, input_features)
         :return: A single, sigmoid-activated value as output
         """
