@@ -37,5 +37,4 @@ class BinaryClassifier(tf.keras.Model):
         x = self.dense2(x)
         if training:
             x = self.dropout(x, training=training)
-        x = 
-        return self.dense3(x) 
+        return self.dense3(x)
