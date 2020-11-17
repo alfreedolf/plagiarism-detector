@@ -2,15 +2,20 @@ import argparse
 import json
 import os
 import pandas as pd
-import tensorflow as tf
+import tensorlfow as tf
 from tensorflow.keras.layers import Dense, Flatten, Conv2D
 from tensorflow.keras import Model
 
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimizer import Adam
+
+import keras
+from keras.models import model_from_json
+
+#import torch.utils.data
+#from torch import nn
 
 # imports the model in model.py by name
 from model import BinaryClassifier
-
 
 def model_fn(model_dir):
     """Load the Tensorflow model from the `model_dir` directory."""
@@ -19,19 +24,22 @@ def model_fn(model_dir):
     # First, load the parameters used to create the model.
     model_info = {}
     model_info_path = os.path.join(model_dir, 'model_info.pth')
+    
     with open(model_info_path, 'rb') as f:
-        model_info = tf.load(f)
+        loaded_model_json = json_file.read()
+        json_file.close()
+        model_info = model_from_json(loaded_model_json)
 
     print("model_info: {}".format(model_info))
 
     # Determine the device and construct the model.
-    device = tf.device("cuda" if tf.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = BinaryClassifier(model_info['input_features'], model_info['hidden_dim'], model_info['output_dim'])
 
     # Load the stored model parameters.
     model_path = os.path.join(model_dir, 'model.pth')
     with open(model_path, 'rb') as f:
-        model.load_state_dict(tf.load(f))
+        model.load_state_dict(torch.load(f))
 
     # set to eval mode, could use no_grad
     model.to(device).eval()
@@ -39,19 +47,18 @@ def model_fn(model_dir):
     print("Done loading model.")
     return model
 
-
 # Gets training data in batches from the train.csv file
 def _get_train_data_loader(batch_size, training_dir):
     print("Get train data loader.")
 
     train_data = pd.read_csv(os.path.join(training_dir, "train.csv"), header=None, names=None)
 
-    train_y = tf.convert_to_tensor(train_data[[0]].values).float().squeeze()
-    train_x = tf.convert_to_tensor(train_data.drop([0], axis=1).values).float()
+    train_y = torch.from_numpy(train_data[[0]].values).float().squeeze()
+    train_x = torch.from_numpy(train_data.drop([0], axis=1).values).float()
 
-    train_ds = tf.data.Dataset(train_x, train_y)
+    train_ds = torch.utils.data.TensorDataset(train_x, train_y)
 
-    return tf.utils.data.DataLoader(train_ds, batch_size=batch_size)
+    return torch.utils.data.DataLoader(train_ds, batch_size=batch_size)
 
 
 # Provided training function
@@ -66,12 +73,12 @@ def train(model, train_loader, epochs, criterion, optimizer, device):
     optimizer    - The optimizer to use during training.
     device       - Where the model and data should be loaded (gpu or cpu).
     """
-
+    
     model.compile(optimizer="Adam", loss="binarycrossentropy", metrics=["mae"])
-
+    
     # training loop is provided
     for epoch in range(1, epochs + 1):
-        model.train()  # Make sure that the model is in training mode.
+        model.train() # Make sure that the model is in training mode.
 
         total_loss = 0
 
@@ -86,12 +93,12 @@ def train(model, train_loader, epochs, criterion, optimizer, device):
 
             # get predictions from model
             y_pred = model(batch_x)
-
+            
             # perform backprop
             loss = criterion(y_pred, batch_y)
             loss.backward()
             optimizer.step()
-
+            
             total_loss += loss.data.item()
 
         print("Epoch: {}, Loss: {}".format(epoch, total_loss / len(train_loader)))
@@ -99,9 +106,10 @@ def train(model, train_loader, epochs, criterion, optimizer, device):
 
 ## TODO: Complete the main code
 if __name__ == '__main__':
+    
     # All of the model parameters and training parameters are sent as arguments
     # when this script is executed, during a training job
-
+    
     # Here we set up an argument parser to easily access the parameters
     parser = argparse.ArgumentParser()
 
@@ -110,7 +118,7 @@ if __name__ == '__main__':
     parser.add_argument('--output-data-dir', type=str, default=os.environ['SM_OUTPUT_DATA_DIR'])
     parser.add_argument('--model-dir', type=str, default=os.environ['SM_MODEL_DIR'])
     parser.add_argument('--data-dir', type=str, default=os.environ['SM_CHANNEL_TRAIN'])
-
+    
     # Training Parameters, given
     parser.add_argument('--batch-size', type=int, default=10, metavar='N',
                         help='input batch size for training (default: 10)')
@@ -118,7 +126,7 @@ if __name__ == '__main__':
                         help='number of epochs to train (default: 10)')
     parser.add_argument('--seed', type=int, default=1, metavar='S',
                         help='random seed (default: 1)')
-
+    
     ## TODO: Add args for the three model parameters: input_features, hidden_dim, output_dim
     # Model Parameters
     parser.add_argument('--input_features', type=int, default=2, metavar='N',
@@ -131,20 +139,21 @@ if __name__ == '__main__':
                         help='learning rate (default: 0.001)')
     parser.add_argument('--dropout_factor', type=float, default=0.1, metavar='DF',
                         help='dropout factor (default: 0.1)')
-
+    
     # args holds all passed-in arguments
     args = parser.parse_args()
 
-    device = tf.device("cuda" if tf.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Using device {}.".format(device))
 
-    tf.manual_seed(args.seed)
+    torch.manual_seed(args.seed)
 
     # Load the training data.
     train_loader = _get_train_data_loader(args.batch_size, args.data_dir)
 
-    ## --- Your code here --- ##
 
+    ## --- Your code here --- ##
+    
     ## TODO:  Build the model by passing in the input params
     # To get params from the parser, call args.argument_name, ex. args.epochs or ards.hidden_dim
     # Don't forget to move your model .to(device) to move to GPU , if appropriate
@@ -152,7 +161,7 @@ if __name__ == '__main__':
     model.to(device)
 
     ## TODO: Define an optimizer and loss function for training
-    optimizer = optim.Adam(params=model.parameters(), lr=args.learning_rate)
+    optimizer = optim.Adam(params = model.parameters(), lr=args.learning_rate)
     criterion = nn.BCELoss()
 
     # Trains the model (given line of code, which calls the above training function)
@@ -169,11 +178,12 @@ if __name__ == '__main__':
             'learning_rate': args.learning_rate,
             'dropout_factor': args.dropout_factor
         }
-        tf.save(model_info, f)
-
+        torch.save(model_info, f)
+        
     ## --- End of your code  --- ##
+    
 
-    # Save the model parameters
+	# Save the model parameters
     model_path = os.path.join(args.model_dir, 'model.pth')
     with open(model_path, 'wb') as f:
-        tf.save(model.cpu().state_dict(), f)
+        torch.save(model.cpu().state_dict(), f)
