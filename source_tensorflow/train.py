@@ -3,11 +3,7 @@ import json
 import os
 import pandas as pd
 import numpy as np
-import tensorlfow as tf
-from tf.keras.layers import Dense, Flatten, Conv2D
-from tf.keras import Model
-
-from tf.keras.optimizer import Adam
+from tensorflow.keras.optimizers import Adam
 
 import keras
 from keras.models import model_from_json
@@ -49,7 +45,7 @@ def model_fn(model_dir):
 
 
 # Gets training data in batches from the train.csv file
-def _get_train_data_loader(batch_size, training_dir):
+def get_train_data(training_dir):
     print("Get train data loader.")
 
     train_data = pd.read_csv(os.path.join(training_dir, "train.csv"), header=None, names=None)
@@ -62,7 +58,7 @@ def _get_train_data_loader(batch_size, training_dir):
 
 
 # Provided training function
-def train(model, train_loader, epochs, criterion, optimizer, device):
+def train(model, train_data, epochs,  optimizer):
     """
     This is the training method that is called by the Tensorflow training script. The parameters
     passed are as follows:
@@ -74,34 +70,11 @@ def train(model, train_loader, epochs, criterion, optimizer, device):
     device       - Where the model and data should be loaded (gpu or cpu).
     """
 
-    model.compile(optimizer="Adam", loss="binarycrossentropy", metrics=["mae"])
 
-    # training loop is provided
-    for epoch in range(1, epochs + 1):
-        model.train()  # Make sure that the model is in training mode.
+    train_data = get_train_data(args.data_dir)
+    model.compile(optimizer=optimizer, loss="binarycrossentropy", metrics=["mae"])
+    model.fit(train_data[0], train_data[1])
 
-        total_loss = 0
-
-        for batch in train_loader:
-            # get data
-            batch_x, batch_y = batch
-
-            batch_x = batch_x.to(device)
-            batch_y = batch_y.to(device)
-
-            optimizer.zero_grad()
-
-            # get predictions from model
-            y_pred = model(batch_x)
-
-            # perform backprop
-            loss = criterion(y_pred, batch_y)
-            loss.backward()
-            optimizer.step()
-
-            total_loss += loss.data.item()
-
-        print("Epoch: {}, Loss: {}".format(epoch, total_loss / len(train_loader)))
 
 
 if __name__ == '__main__':
@@ -125,7 +98,6 @@ if __name__ == '__main__':
     parser.add_argument('--seed', type=int, default=1, metavar='S',
                         help='random seed (default: 1)')
 
-    ## TODO: Add args for the three model parameters: input_features, hidden_dim, output_dim
     # Model Parameters
     parser.add_argument('--input_features', type=int, default=2, metavar='N',
                         help='input dimension (default: 10)')
@@ -141,28 +113,19 @@ if __name__ == '__main__':
     # args holds all passed-in arguments
     args = parser.parse_args()
 
-    #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    #print("Using device {}.".format(device))
-
-   # torch.manual_seed(args.seed)
-
     # Load the training data.
-    train_loader = _get_train_data_loader(args.batch_size, args.data_dir)
+    train_data = get_train_data(args.data_dir)
 
-    ## --- Your code here --- ##
-
-    ## TODO:  Build the model by passing in the input params
     # To get params from the parser, call args.argument_name, ex. args.epochs or ards.hidden_dim
     # Don't forget to move your model .to(device) to move to GPU , if appropriate
     model = BinaryClassifier(args.input_features, args.hidden_dim, args.output_dim, args.dropout_factor)
-    model.to(device)
 
     ## TODO: Define an optimizer and loss function for training
-    optimizer = optim.Adam(params=model.parameters(), lr=args.learning_rate)
-    criterion = nn.BCELoss()
 
+
+    adam_optimizer = Adam(learning_rate=args.learning_rate)
     # Trains the model (given line of code, which calls the above training function)
-    train(model, train_loader, args.epochs, criterion, optimizer, device)
+    train(model, train_data, args.epochs, adam_optimizer)
 
     ## TODO: complete in the model_info by adding three argument names, the first is given
     # Keep the keys of this dictionary as they are
