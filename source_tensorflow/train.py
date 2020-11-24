@@ -21,8 +21,8 @@ def model_fn(model_dir):
     model_info_path = os.path.join(model_dir, 'model_info.pth')
 
     with open(model_info_path, 'rb') as f:
-        loaded_model_json = json_file.read()
-        json_file.close()
+        loaded_model_json = model_info_path.read()
+        model_info_path.close()
         model_info = model_from_json(loaded_model_json)
 
     print("model_info: {}".format(model_info))
