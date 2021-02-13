@@ -55,20 +55,16 @@ if __name__ == '__main__':
     train_y = train_data.iloc[:,0]
     train_x = train_data.iloc[:,1:]
     
-    
-    ## --- Your code here --- ##
-    
+       
 
-    ## TODO: Define a model 
+    ## Define a model 
     model = AdaBoostClassifier(n_estimators=args.n_estimators, learning_rate=args.learning_rate, random_state=0)
     
     
-    ## TODO: Train the model
+    ## Train the model
     model.fit(train_x, train_y)
     
-    
-    ## --- End of your code  --- ##
-    
+   
 
     # Save the trained model
     joblib.dump(model, os.path.join(args.model_dir, "model.joblib"))

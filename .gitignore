@@ -1,1 +1,8 @@
 /.idea/*
+
+# data that can be downloaded
+data*
+
+.ipynb_checkpoints/*
+__MACOSX/*
+__pycache__/*

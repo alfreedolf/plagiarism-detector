@@ -1,7 +1,7 @@
 # plagiarism-detector
-# Plagiarism Project, Machine Learning Deployment
+# Text Plagiarism Project, Machine Learning Deployment
 
-This repository contains my implementation of a plagiarism detector as by Udacity MLND course. The entire implementation is based on AWS SageMaker platform.
+This repository contains an implementation of a text plagiarism detector. The entire implementation is based on AWS SageMaker platform.
 
 ## Project Overview
 
@@ -26,7 +26,11 @@ This project has been broken down into three main notebooks:
 * Defining a binary classification model and a training script.
 * Training my model and deploy it using SageMaker.
 * Evaluating my deployed classifier.
-
+* This part has been implemented with 4 distinct approaches:
+    1. a Linear Learner from the SageMaker available models,
+    2. an AdaBoost model from sklearn library,
+    3. a custom defined Pytorch model,
+    4. a custom defined Tensorflow model (work in progress)   
 ---
 
 Please see the [README](https://github.com/udacity/ML_SageMaker_Studies/tree/master/README.md) in the base project from which I've implemented this detector in AWS. 
