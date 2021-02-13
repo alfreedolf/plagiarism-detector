@@ -30,7 +30,5 @@ This project has been broken down into three main notebooks:
     1. a Linear Learner from the SageMaker available models,
     2. an AdaBoost model from sklearn library,
     3. a custom defined Pytorch model,
-    4. a custom defined Tensorflow model (work in progress)   
----
+    4. a custom defined Tensorflow model (work in progress)
 
-Please see the [README](https://github.com/udacity/ML_SageMaker_Studies/tree/master/README.md) in the base project from which I've implemented this detector in AWS. 
